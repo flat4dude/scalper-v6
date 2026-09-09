@@ -113,6 +113,9 @@
             color: var(--text-muted);
             margin-bottom: 6px;
             display: block;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .control-row {
@@ -143,6 +146,12 @@
             background-color: #1f242c;
         }
 
+        .num-input:disabled {
+            color: var(--text-muted);
+            background-color: rgba(0,0,0,0.2);
+            cursor: not-allowed;
+        }
+
         .label {
             font-size: 0.85rem;
             color: var(--text-muted);
@@ -164,64 +173,78 @@
             font-style: italic;
             font-weight: 600;
         }
+
+        .lock-checkbox {
+            cursor: pointer;
+            accent-color: var(--accent-gold);
+            width: 16px;
+            height: 16px;
+        }
     </style>
 </head>
 <body>
 
 <div class="terminal-container">
     <div class="header">
-        <h1>Automated 86% Kalshi Gold Scalper</h1>
-        <h2>🏆 KXGOLD15M 86% Auto</h2>
+        <h1>Automated Kalshi Gold Scalper</h1>
+        <h2>🏆 KXGOLD15M Scalp Terminal</h2>
         <div id="statusIndicator" class="status-badge status-standby">
             ● Standby WAITING FOR WINDOW
         </div>
     </div>
 
     <div class="system-rule">
-        🔥 SYSTEM AUTOMATED: Alert opens at 5:00 left if Premium hits 86%+
+        🔥 SYSTEM AUTOMATED: Alert opens at 5:00 left if Premium hits Target Floor
     </div>
-    <!-- Real-Time Institutional Input Interfaces -->
+    <!-- Real-Time Input Fields -->
     <div class="input-group">
-        <span class="input-label">📡 Live Spot Price ($)</span>
+        <span class="input-label">✍ Live Spot Price ($)</span>
         <div class="control-row">
-            <input type="number" id="spotPriceInput" class="num-input" step="0.01" value="4353.70" oninput="updateField('spotPrice', this.value)">
+            <input type="number" id="spotPriceInput" class="num-input" step="0.01" value="4412.30" oninput="updateField('spotPrice', this.value)">
         </div>
     </div>
 
     <div class="input-group">
         <span class="input-label">✍ Target Strike ($)</span>
         <div class="control-row">
-            <input type="number" id="targetStrikeInput" class="num-input" step="0.01" value="4358.64" oninput="updateField('targetStrike', this.value)">
+            <input type="number" id="targetStrikeInput" class="num-input" step="0.01" value="4405.00" oninput="updateField('targetStrike', this.value)">
         </div>
     </div>
 
-    <!-- Kalshi Styled Dual-Sided Percentage Row -->
+    <!-- Customizable Locked Trigger Floor System Configuration -->
+    <div class="input-group">
+        <span class="input-label">
+            <span>⚙️ Target Trigger Floor (%)</span>
+            <label style="display: flex; align-items: center; gap: 4px; font-size: 0.8rem; color: var(--accent-gold); cursor: pointer;">
+                <input type="checkbox" id="floorLockCheckbox" class="lock-checkbox" checked onchange="toggleFloorLock(this.checked)"> 🔒 Lock Floor
+            </label>
+        </span>
+        <div class="control-row">
+            <input type="number" id="triggerFloorInput" class="num-input" step="1" min="1" max="99" value="86" disabled oninput="updateField('triggerFloor', this.value)">
+        </div>
+    </div>
+
+    <!-- Kalshi Styled Dual-Sided Percentage Row Layout -->
     <div style="display: flex; gap: 10px; margin: 20px 0 10px 0;">
-        <div id="upBadge" style="flex: 1; text-align: center; padding: 12px; border-radius: 24px; font-weight: 800; font-size: 1.1rem; background-color: rgba(46, 160, 67, 0.2); color: #56d364; border: 1px solid rgba(46,160,67,0.4); min-width: 110px;">
-            Up · 11%
+        <div id="upBadge" style="flex: 1; text-align: center; padding: 12px; border-radius: 24px; font-weight: 800; font-size: 1.1rem; background-color: rgba(46, 160, 67, 0.2); color: #56d364; border: 1px solid rgba(46,160,67,0.4);">
+            Up · --%
         </div>
-        <div id="downBadge" style="flex: 1; text-align: center; padding: 12px; border-radius: 24px; font-weight: 800; font-size: 1.1rem; background-color: rgba(248, 81, 73, 0.2); color: #ff7b72; border: 1px solid rgba(248,81,73,0.4); min-width: 110px;">
-            Down · 89%
+        <div id="downBadge" style="flex: 1; text-align: center; padding: 12px; border-radius: 24px; font-weight: 800; font-size: 1.1rem; background-color: rgba(248, 81, 73, 0.2); color: #ff7b72; border: 1px solid rgba(248,81,73,0.4);">
+            Down · --%
         </div>
     </div>
 
-    <!-- Master Control Controls Row -->
+    <!-- Audio Overrides & Re-engineered Force Sync Button Matrix -->
     <div style="display: flex; gap: 10px; margin-bottom: 15px;">
         <button id="muteBtn" onclick="toggleAudioSystem()" style="flex: 1; background-color: #21262d; color: #ff7b72; border: 1px solid var(--border-color); padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer;">
             🔇 Audio Alert: MUTED
         </button>
-        <button id="syncBtn" onclick="autoFetchPriceFeed()" style="flex: 1; background-color: #2ea043; color: #fff; border: 1px solid rgba(46,160,67,0.4); padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer;">
-            🔄 Force Hard Sync
+        <button id="syncBtn" onclick="forceSyncEngine()" style="flex: 1; background-color: #2ea043; color: #fff; border: 1px solid rgba(46,160,67,0.4); padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer;">
+            🔄 Force Sync Math
         </button>
     </div>
 
-    <div class="auto-pulse-indicator" id="pulseNotice">📡 Stream connected. Auto-fetching live data...</div>
-
-    <!-- Rule Boundaries -->
-    <div class="data-display-box" style="background: none; border-color: transparent; margin-bottom: 0;">
-        <span class="label">Locked Trigger Floor</span>
-        <span class="value-stream" style="color: #ff7b72;">86%</span>
-    </div>
+    <div class="auto-pulse-indicator" id="pulseNotice">🟢 Terminal tracking active. Intervall clocks locked to local system.</div>
 
     <div class="data-display-box" style="background: none; border-color: transparent;">
         <span class="label">⏱ Auto-Calculated Time Left</span>
@@ -230,10 +253,12 @@
 </div>
 
 <script>
+    // System core state tracking dictionary (Grounded directly to gold pricing metrics)
     let data = {
-        spotPrice: 4353.70,
-        targetStrike: 4358.64,
-        upPercent: 11,
+        spotPrice: 4412.30,
+        targetStrike: 4405.00,
+        triggerFloor: 86,
+        upPercent: 50,
         secondsLeft: 60,
         isMuted: true
     };
@@ -248,15 +273,15 @@
             let osc = audioCtx.createOscillator();
             let gainNode = audioCtx.createGain();
             osc.type = "sine";
-            osc.frequency.setValueAtTime(880, audioCtx.currentTime);
-            gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime);
+            osc.frequency.setValueAtTime(920, audioCtx.currentTime); 
+            gainNode.gain.setValueAtTime(0.20, audioCtx.currentTime);
             osc.connect(gainNode);
             gainNode.connect(audioCtx.destination);
             osc.start();
-            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
-            osc.stop(audioCtx.currentTime + 0.16);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.18);
+            osc.stop(audioCtx.currentTime + 0.19);
         } catch (e) {
-            console.error("Audio block failed:", e);
+            console.error("Audio generation failed:", e);
         }
     }
 
@@ -275,6 +300,10 @@
         }
     }
 
+    function toggleFloorLock(isLocked) {
+        document.getElementById('triggerFloorInput').disabled = isLocked;
+    }
+
     function updateField(field, val) {
         let parsed = parseFloat(val);
         if (!isNaN(parsed)) {
@@ -283,39 +312,38 @@
         }
     }
 
-    // High frequency institutional endpoint scanner. Completely free from rate limits.
-    async function autoFetchPriceFeed() {
-        try {
-            // Queries Binance US institutional ticker matrix for real-time unblocked PAXG/USD tracking
-            const response = await fetch('https://binance.us');
-            const result = await response.json();
-            
-            if (result && result.price) {
-                let currentSpotVal = parseFloat(result.price);
-                
-                // Directly feed the stream into memory and view inputs
-                data.spotPrice = currentSpotVal;
-                document.getElementById('spotPriceInput').value = currentSpotVal.toFixed(2);
-                
-                document.getElementById('pulseNotice').innerText = "🟢 Real-time price feed active (Synced via Binance API)";
-                recalculateMetrics();
-            }
-        } catch (err) {
-            console.error("API error, tracking locally:", err);
-        }
+    // Fixed Force Sync Engine: Loops internal evaluation routines instantly
+    function forceSyncEngine() {
+        const notice = document.getElementById('pulseNotice');
+        
+        // Directly fetch the latest data inputs straight from the viewport fields
+        data.spotPrice = parseFloat(document.getElementById('spotPriceInput').value) || 4412.30;
+        data.targetStrike = parseFloat(document.getElementById('targetStrikeInput').value) || 4405.00;
+        data.triggerFloor = parseFloat(document.getElementById('triggerFloorInput').value) || 86;
+
+        notice.innerText = "⚡ Core data cache reset. Metrics re-aligned.";
+        setTimeout(() => {
+            notice.innerText = "🟢 Terminal tracking active. Intervall clocks locked to local system.";
+        }, 1500);
+
+        recalculateMetrics();
+        runClockSequence();
     }
 
     function recalculateMetrics() {
         let distance = data.spotPrice - data.targetStrike;
-        let calculatedUp = 50 + (distance * 12.5);
         
-        // Exact asymmetric tracking curve mapping
-        if (distance <= -6.0) {
+        // Continuous Pricing Engine: center ratio at 50% when spot matches strike exactly
+        let baseProb = 50 + (distance * 14.5);
+        
+        // Exact asymmetric step bounds mapping to Kalshi's deep out-of-the-money drop characteristics
+        let calculatedUp = 0;
+        if (distance <= -4.0) {
             calculatedUp = 0.1;
-        } else if (distance >= 5.0) {
+        } else if (distance >= 4.0) {
             calculatedUp = 99.9;
         } else {
-            calculatedUp = Math.min(99, Math.max(1, Math.round(calculatedUp)));
+            calculatedUp = Math.min(99, Math.max(1, Math.round(baseProb)));
         }
 
         data.upPercent = calculatedUp;
@@ -337,8 +365,9 @@
         let secs = (data.secondsLeft % 60).toString().padStart(2, '0');
         document.getElementById('liveClock').innerText = `${mins}:${secs}`;
 
+        // Automation matching rules validation limits (Time remaining <= 5:00 AND up premium percentage >= the set trigger floor)
         const isTimeMatch = data.secondsLeft <= 300 && data.secondsLeft > 0;
-        const isPremiumMatch = data.upPercent >= 86;
+        const isPremiumMatch = data.upPercent >= data.triggerFloor;
 
         const badge = document.getElementById('statusIndicator');
         if (isTimeMatch && isPremiumMatch) {
@@ -360,12 +389,14 @@
         }
     }
 
-    // Automate data retrieval: fetches fresh data every 3 seconds completely on its own
-    setInterval(autoFetchPriceFeed, 3000);
-    setInterval(runClockSequence, 1000);
+    // High frequency operational scanner loop updates executing smoothly every 1 second
+    setInterval(() => {
+        recalculateMetrics();
+        runClockSequence();
+    }, 1000);
 
-    // Initial hardware checks
-    autoFetchPriceFeed();
+    // Initial baseline pass executions
+    recalculateMetrics();
     runClockSequence();
 </script>
 

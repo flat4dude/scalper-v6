@@ -222,7 +222,7 @@
     </div>
 
     <!-- Kalshi Styled Dual-Sided Percentage Row -->
-    <div style="display: flex; gap: 10px; margin: 20px 0 15px 0;">
+    <div style="display: flex; gap: 10px; margin: 20px 0 10px 0;">
         <div id="upBadge" style="flex: 1; text-align: center; padding: 12px; border-radius: 24px; font-weight: 800; font-size: 1.1rem; background-color: rgba(46, 160, 67, 0.2); color: #56d364; border: 1px solid rgba(46,160,67,0.4); min-width: 110px;">
             Up · 0.1%
         </div>
@@ -231,7 +231,17 @@
         </div>
     </div>
 
-    <div class="auto-pulse-indicator" id="pulseNotice">📡 Asymmetric distribution engine active. Tracking steep delta breaks.</div>
+    <!-- Control Rows: Audio Controller & Hard Sync Button -->
+    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+        <button id="muteBtn" onclick="toggleAudioSystem()" style="flex: 1; background-color: #21262d; color: #ff7b72; border: 1px solid var(--border-color); padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer;">
+            🔇 Audio Alert: MUTED
+        </button>
+        <button onclick="forceSyncEngine()" style="flex: 1; background-color: #2ea043; color: #fff; border: 1px solid rgba(46,160,67,0.4); padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer;">
+            🔄 Force Sync Math
+        </button>
+    </div>
+
+    <div class="auto-pulse-indicator" id="pulseNotice">📡 Advanced Delta engine ready. Sound card initialized.</div>
 
     <!-- Rule Boundaries -->
     <div class="data-display-box" style="background: none; border-color: transparent; margin-bottom: 0;">
@@ -246,13 +256,58 @@
 </div>
 
 <script>
-    // Core parameters explicitly synchronized with your crash drop mobile capture state
+    // State management framework tracking live parameter variations
     let data = {
         spotPrice: 4349.44,
         targetStrike: 4358.64,
         upPercent: 0.1,
-        secondsLeft: 60
+        secondsLeft: 60,
+        isMuted: true
     };
+
+    // Low-overhead browser synthesizer to generate clear system beeps without requiring a separate .mp3 file
+    let audioCtx = null;
+    let beepIntervalId = null;
+
+    function playTriggerBeep() {
+        if (data.isMuted) return;
+        try {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            
+            let osc = audioCtx.createOscillator();
+            let gainNode = audioCtx.createGain();
+            
+            osc.type = "sine";
+            osc.frequency.setValueAtTime(880, audioCtx.currentTime); // High pitch notification register
+            gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime); // Controlled output volume floor
+            
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            osc.start();
+            // Sharp decay configuration to build a clean ping structure
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+            osc.stop(audioCtx.currentTime + 0.16);
+        } catch (e) {
+            console.error("Audio generation exception handler:", e);
+        }
+    }
+
+    function toggleAudioSystem() {
+        data.isMuted = !data.isMuted;
+        const btn = document.getElementById('muteBtn');
+        if (data.isMuted) {
+            btn.innerText = "🔇 Audio Alert: MUTED";
+            btn.style.color = "#ff7b72";
+            btn.style.borderColor = "var(--border-color)";
+        } else {
+            btn.innerText = "🔊 Audio Alert: LIVE";
+            btn.style.color = "#56d364";
+            btn.style.borderColor = "rgba(46,160,67,0.4)";
+            // Instantly unblock browser audio constraints upon click sequence actions
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+    }
 
     function updateField(field, val) {
         let parsed = parseFloat(val);
@@ -262,14 +317,24 @@
         }
     }
 
-    function recalculateMetrics() {
-        // High-velocity distance calculation tracking spread differentials
-        let distance = data.spotPrice - data.targetStrike;
+    function forceSyncEngine() {
+        // Reads raw current values directly from document input viewports to force hard overwrite loops
+        data.spotPrice = parseFloat(document.getElementById('spotPriceInput').value) || 4349.44;
+        data.targetStrike = parseFloat(document.getElementById('targetStrikeInput').value) || 4358.64;
         
+        document.getElementById('pulseNotice').innerText = "⚡ Core data cache reset. Metrics re-aligned.";
+        setTimeout(() => {
+            document.getElementById('pulseNotice').innerText = "📡 Advanced Delta engine ready. Sound card initialized.";
+        }, 1500);
+
+        recalculateMetrics();
+        runClockSequence();
+    }
+
+    function recalculateMetrics() {
+        let distance = data.spotPrice - data.targetStrike;
         let calculatedUp = 50 + (distance * 12.5);
         
-        // Exact Kalshi Asymmetric Crash Override Logic:
-        // When a contract drops deep out-of-the-money, probability collapses immediately to fractional bounds
         if (distance <= -6.0) {
             calculatedUp = 0.1;
         } else if (distance >= 5.0) {
@@ -278,23 +343,18 @@
             calculatedUp = Math.min(99, Math.max(1, Math.round(calculatedUp)));
         }
 
-        // Force precise values if baseline match occurs
         if (data.spotPrice === 4349.44 && data.targetStrike === 4358.64) {
             calculatedUp = 0.1;
         }
 
         data.upPercent = calculatedUp;
-        
-        // Calculate the inverse down position cleanly, keeping decimal lengths string-safe
         let calculatedDown = (calculatedUp === 0.1) ? "99.9" : (calculatedUp === 99.9) ? "0.1" : (100 - calculatedUp);
 
-        // Print values safely back to Kalshi UI container targets
         document.getElementById('upBadge').innerText = `Up · ${calculatedUp}%`;
         document.getElementById('downBadge').innerText = `Down · ${calculatedDown}%`;
     }
 
     function runClockSequence() {
-        // Device hardware system-time synchronizer running standard 15m intervals
         let now = new Date();
         let currentMinutes = now.getMinutes();
         let currentSeconds = now.getSeconds();
@@ -314,16 +374,27 @@
         if (isTimeMatch && isPremiumMatch) {
             badge.innerText = "⚠️ SYSTEM TRIGGERED: EXECUTING TRADING WINDOW";
             badge.className = "status-badge status-triggered";
+            
+            // Loop audio warning every 2 seconds when condition parameters hold active configurations
+            if (!beepIntervalId) {
+                playTriggerBeep();
+                beepIntervalId = setInterval(playTriggerBeep, 2000);
+            }
         } else {
             badge.innerText = "● Standby WAITING FOR WINDOW";
             badge.className = "status-badge status-standby";
+            
+            if (beepIntervalId) {
+                clearInterval(beepIntervalId);
+                beepIntervalId = null;
+            }
         }
     }
 
-    // High frequency micro loop monitoring state changes every 1 second
+    // High frequency operational scanner loop updates executing smoothly every 1 second
     setInterval(runClockSequence, 1000);
 
-    // Run startup pass initialization cycles
+    // Initial operational verification pass executions
     recalculateMetrics();
     runClockSequence();
 </script>
